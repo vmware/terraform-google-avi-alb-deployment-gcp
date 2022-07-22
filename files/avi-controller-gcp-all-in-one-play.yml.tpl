@@ -135,7 +135,8 @@
             mode: "{{ vip_allocation_strategy }}" %{ if vip_allocation_strategy == "ILB" }
             ilb:
               cloud_router_names:
-                - "{{ cloud_router }}"%{ endif ~}
+                - "{{ cloud_router }}"
+            %{ endif }
 %{ if se_service_account != null ~}
           gcp_service_account_email: "{{ gcp_service_account_email }}"
 %{ endif ~}
@@ -429,6 +430,12 @@
             ip_addresses:
               - type: "V4"
                 addr: "{{ controller_ip[0] }}"
+%{ if controller_ha ~}
+              - type: "V4"
+                addr: "{{ controller_ip[1] }}"
+              - type: "V4"
+                addr: "{{ controller_ip[2] }}"
+%{ endif ~}
             enabled: True
             member_type: "GSLB_ACTIVE_MEMBER"
             port: 443
@@ -440,6 +447,9 @@
           - domain_name: "${domain}"
 %{ endfor ~}
         leader_cluster_uuid: "{{ cluster.obj.uuid }}"
+      until: gslb_results is not failed
+      retries: 30
+      delay: 5
       register: gslb_results
 %{ endif ~}
 %{ if configure_gslb_additional_sites ~}%{ for site in additional_gslb_sites ~}
@@ -539,6 +549,6 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-        name: "cluster01"
+        name: "{{ se_name_prefix }}-cluster"
         tenant_uuid: "admin"
 %{ endif }
