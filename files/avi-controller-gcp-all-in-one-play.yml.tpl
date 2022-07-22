@@ -135,8 +135,7 @@
             mode: "{{ vip_allocation_strategy }}" %{ if vip_allocation_strategy == "ILB" }
             ilb:
               cloud_router_names:
-                - "{{ cloud_router }}"
-            %{ endif }
+                - "{{ cloud_router }}"%{ endif ~}
 %{ if se_service_account != null ~}
           gcp_service_account_email: "{{ gcp_service_account_email }}"
 %{ endif ~}
@@ -148,7 +147,7 @@
         name: Backup-Configuration
         backup_passphrase: "{{ password }}"
         upload_to_remote_host: false
-%{ if se_ha_mode == "active/active" }
+%{ if se_ha_mode == "active/active" ~}
     - name: Configure SE-Group
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -172,8 +171,8 @@
           realtime_se_metrics:
             duration: "60"
             enabled: true
-%{ endif }
-%{ if se_ha_mode == "n+m" }
+%{ endif ~}
+%{ if se_ha_mode == "n+m" ~}
     - name: Configure SE-Group
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -197,8 +196,8 @@
           realtime_se_metrics:
             duration: "60"
             enabled: true
-%{ endif }
-%{ if se_ha_mode == "active/standby" }
+%{ endif ~}
+%{ if se_ha_mode == "active/standby" ~}
     - name: Configure SE-Group
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -221,7 +220,7 @@
           realtime_se_metrics:
             duration: "60"
             enabled: true
-%{ endif }
+%{ endif ~}
 %{ if configure_ipam_profile ~}
     - name: Update IPAM Network Objects with Static Pool
       avi_network:
@@ -275,7 +274,7 @@
           add:
             ipam_provider_ref: "{{ create_ipam.obj.url }}"
 %{ endif ~}
-%{ if configure_dns_profile }
+%{ if configure_dns_profile ~}
     - name: Create Avi DNS Profile
       avi_ipamdnsproviderprofile:
         avi_credentials: "{{ avi_credentials }}"
@@ -296,8 +295,8 @@
         data:
           add:
             dns_provider_ref: "{{ create_dns.obj.url }}"
-%{ endif }
-%{ if configure_gslb && create_gslb_se_group }
+%{ endif ~}
+%{ if configure_gslb && create_gslb_se_group ~}
     - name: Configure GSLB SE-Group
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -322,7 +321,7 @@
             duration: "60"
             enabled: true
       register: gslb_se_group
-%{ endif}
+%{ endif ~}
 %{ if configure_dns_vs ~}
     - name: Create DNS VSVIP
       avi_api_session:
@@ -411,8 +410,8 @@
         avi_api_patch_op: add
         tenant: admin
         dns_virtualservice_refs: "{{ dns_vs.obj.url }}"
-%{ endif}
-%{ if configure_gslb && gslb_site_name != "" }
+%{ endif ~}
+%{ if configure_gslb && gslb_site_name != "" ~}
     - name: GSLB Config | Verify Cluster UUID
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -437,13 +436,13 @@
               - dns_vs_uuid: "{{ dns_vs.obj.uuid }}"
             cluster_uuid: "{{ cluster.obj.uuid }}"
         dns_configs:
-          %{ for domain in gslb_domains }
+%{ for domain in gslb_domains ~}
           - domain_name: "${domain}"
-          %{ endfor }
+%{ endfor ~}
         leader_cluster_uuid: "{{ cluster.obj.uuid }}"
       register: gslb_results
-  %{ endif }
-  %{ if configure_gslb_additional_sites }%{ for site in additional_gslb_sites }
+%{ endif ~}
+%{ if configure_gslb_additional_sites ~}%{ for site in additional_gslb_sites ~}
 
     - name: GSLB Config | Verify Remote Site is Ready
       avi_api_session:
