@@ -443,7 +443,6 @@
       register: gslb_results
 %{ endif ~}
 %{ if configure_gslb_additional_sites ~}%{ for site in additional_gslb_sites ~}
-
     - name: GSLB Config | Verify Remote Site is Ready
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
