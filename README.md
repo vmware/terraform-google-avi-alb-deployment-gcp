@@ -124,7 +124,7 @@ module "avi_controller_west" {
   gslb_site_name                  = "West1"
   gslb_domains                    = ["gslb.domain"]
   configure_gslb_additional_sites = "true"
-  additional_gslb_sites           = [{name = "East1", ip_address = module.avi_controller_east.controllers[0].private_ip_address , dns_vs_name = "DNS-VS"}]
+  additional_gslb_sites           = [{name = "East1", ip_address = module.avi_controller_east.controllers[*].private_ip_address , dns_vs_name = "DNS-VS"}]
 }
 output "west_controller_ip" { 
   value = module.avi_controller_west.controllers
@@ -226,7 +226,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_gslb_sites"></a> [additional\_gslb\_sites](#input\_additional\_gslb\_sites) | The Names and IP addresses of the GSLB Sites that will be configured. | `list(object({ name = string, ip_address = string, dns_vs_name = string }))` | <pre>[<br>  {<br>    "dns_vs_name": "",<br>    "ip_address": "",<br>    "name": ""<br>  }<br>]</pre> | no |
+| <a name="input_additional_gslb_sites"></a> [additional\_gslb\_sites](#input\_additional\_gslb\_sites) | The Names and IP addresses of the GSLB Sites that will be configured. | `list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))` | <pre>[<br>  {<br>    "dns_vs_name": "",<br>    "ip_address_list": [<br>      ""<br>    ],<br>    "name": ""<br>  }<br>]</pre> | no |
 | <a name="input_avi_subnet"></a> [avi\_subnet](#input\_avi\_subnet) | The CIDR that will be used for creating a subnet in the Avi VPC | `string` | `"10.255.1.0/24"` | no |
 | <a name="input_avi_version"></a> [avi\_version](#input\_avi\_version) | The version of Avi that will be deployed | `string` | n/a | yes |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |

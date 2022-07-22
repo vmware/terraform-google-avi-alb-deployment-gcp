@@ -76,8 +76,8 @@ variable "configure_gslb_additional_sites" {
 }
 variable "additional_gslb_sites" {
   description = "The Names and IP addresses of the GSLB Sites that will be configured."
-  type        = list(object({ name = string, ip_address = string, dns_vs_name = string }))
-  default     = [{ name = "", ip_address = "", dns_vs_name = "" }]
+  type        = list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))
+  default     = [{ name = "", ip_address_list = [""], dns_vs_name = "" }]
 }
 variable "create_gslb_se_group" {
   description = "Create a SE group for GSLB. This option only applies when configure_gslb is set to true"

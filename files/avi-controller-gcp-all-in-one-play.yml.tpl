@@ -445,15 +445,29 @@
   %{ endif }
   %{ if configure_gslb_additional_sites }%{ for site in additional_gslb_sites }
 
-    - name: GSLB Config | Verify DNS configuration
+    - name: GSLB Config | Verify Remote Site is Ready
       avi_api_session:
-        controller: "${site.ip_address}"
+        controller: "${site.ip_address_list[0]}"
         username: "admin"
         password: "{{ password }}"
         api_version: ${avi_version}
         http_method: get
         path: virtualservice?name=DNS-VS
-      until: dns_vs_verify.obj.count == 1
+      until: remote_site_check is not failed
+      retries: 30
+      delay: 10
+      register: remote_site_check
+
+    - name: GSLB Config | Verify DNS configuration
+      avi_api_session:
+        controller: "${site.ip_address_list[0]}"
+        username: "admin"
+        password: "{{ password }}"
+        api_version: ${avi_version}
+        http_method: get
+        path: virtualservice?name=DNS-VS
+      until: dns_vs_verify is not failed
+      failed_when: dns_vs_verify.obj.count != 1
       retries: 30
       delay: 10
       register: dns_vs_verify
@@ -474,7 +488,7 @@
           port: 443
           ip_addresses:
             - type: "V4"
-              addr: "${site.ip_address}"
+              addr: "${site.ip_address_list[0]}"
       register: gslb_verify
       
     - name: Display GSLB Siteops Verify
@@ -496,8 +510,10 @@
                 password: "{{ password }}"
                 cluster_uuid: "{{ gslb_verify.obj.rx_uuid }}"
                 ip_addresses:
+%{ for address in site.ip_address_list ~}
                   - type: "V4"
-                    addr: "${site.ip_address}"
+                    addr: "${address}"
+%{ endfor ~}
                 dns_vses:
                   - dns_vs_uuid: "{{ dns_vs_verify.obj.results.0.uuid }}"
   %{ endfor }%{ endif }
