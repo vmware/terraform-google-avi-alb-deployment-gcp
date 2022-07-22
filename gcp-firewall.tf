@@ -49,6 +49,11 @@ resource "google_compute_firewall" "avi_se_to_se" {
     ports    = ["1550"]
   }
 
+  allow {
+    protocol = "tcp"
+    ports    = ["4001"]
+  }
+
   source_tags = ["avi-se"]
   target_tags = ["avi-se"]
   depends_on  = [google_compute_network.vpc_network]
