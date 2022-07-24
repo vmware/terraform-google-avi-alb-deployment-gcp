@@ -13,7 +13,7 @@ locals {
     region                          = var.region
     se_project_id                   = var.service_engine_project != "" ? var.service_engine_project : var.project
     gcs_project_id                  = var.storage_project != "" ? var.storage_project : var.project
-    se_name_prefix                  = var.name_prefix
+    name_prefix                     = var.name_prefix
     se_cpu                          = var.se_size[0]
     se_memory                       = var.se_size[1]
     se_disk                         = var.se_size[2]
@@ -23,6 +23,10 @@ locals {
     vip_allocation_strategy         = var.vip_allocation_strategy
     zones                           = data.google_compute_zones.available.names
     controller_ha                   = var.controller_ha
+    register_controller             = var.register_controller
+    registration_jwt                = var.registration_jwt
+    registration_email              = var.registration_email
+    registration_account_id         = var.registration_account_id
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     cloud_router                    = var.create_networking ? var.vip_allocation_strategy == "ILB" ? google_compute_router.avi[0].name : null : null
@@ -97,9 +101,18 @@ resource "null_resource" "ansible_provisioner" {
     password = var.controller_password
   }
   provisioner "file" {
+    source      = "${path.module}/files/avi_pulse_registration.py"
+    destination = "/home/admin/avi_pulse_registration.py"
+  }
+  provisioner "file" {
     content = templatefile("${path.module}/files/avi-controller-gcp-all-in-one-play.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/avi-controller-gcp-all-in-one-play.yml"
+  }
+  provisioner "file" {
+    content = templatefile("${path.module}/files/avi-cloud-services-registration.yml.tpl",
+    local.cloud_settings)
+    destination = "/home/admin/avi-cloud-services-registration.yml"
   }
   provisioner "file" {
     content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
@@ -111,5 +124,11 @@ resource "null_resource" "ansible_provisioner" {
       "ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password='${var.controller_password}' > ansible-playbook.log 2> ansible-error.log",
       "echo Controller Configuration Completed"
     ]
+  }
+  provisioner "remote-exec" {
+    inline = var.register_controller ? [
+      "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
+      "echo Controller Registration Completed"
+    ] : ["echo Controller Registration Skipped"]
   }
 }

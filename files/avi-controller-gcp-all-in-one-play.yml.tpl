@@ -27,7 +27,7 @@
     region: ${region}
     se_project_id: ${se_project_id}
     gcs_project_id: ${gcs_project_id}
-    se_name_prefix: ${se_name_prefix}
+    name_prefix: ${name_prefix}
     se_cpu: ${se_cpu}
     se_memory: ${se_memory}
     se_disk: ${se_disk}
@@ -165,7 +165,7 @@
           algo: PLACEMENT_ALGO_PACKED
           buffer_se: "0"
           max_se: "10"
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           vcpus_per_se: "{{ se_cpu }}"
           memory_per_se: "{{ se_memory * 1024 }}"
           disk_per_se: "{{ se_disk }}"
@@ -190,7 +190,7 @@
           algo: PLACEMENT_ALGO_PACKED
           buffer_se: "1"
           max_se: "10"
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           vcpus_per_se: "{{ se_cpu }}"
           memory_per_se: "{{ se_memory * 1024 }}"
           disk_per_se: "{{ se_disk }}"
@@ -214,7 +214,7 @@
           min_scaleout_per_vs: 1
           buffer_se: "0"
           max_se: "2"
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           vcpus_per_se: "{{ se_cpu }}"
           memory_per_se: "{{ se_memory * 1024 }}"
           disk_per_se: "{{ se_disk }}"
@@ -549,10 +549,33 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-        name: "{{ se_name_prefix }}-cluster"
+        name: "{{ name_prefix }}-cluster"
         tenant_uuid: "admin"
       until: cluster_config is not failed
       retries: 10
       delay: 5
       register: cluster_config
 %{ endif }
+%{ if register_controller ~}
+
+    - name: Create Ansible collection directory
+      ansible.builtin.file:
+        path: /usr/share/ansible/collections
+        state: directory
+        mode: '0755'
+        owner: admin
+        group: admin
+
+    - name: Install Avi Collection
+      shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
+
+    - name: Copy Ansible module file
+      ansible.builtin.copy:
+        src: /home/admin/avi_pulse_registration.py
+        dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
+    
+    - name: Remove unused module file
+      ansible.builtin.file:
+        path: /home/admin/avi_pulse_registration.py
+        state: absent
+%{ endif ~}

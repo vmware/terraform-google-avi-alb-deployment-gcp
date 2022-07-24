@@ -93,6 +93,26 @@ variable "controller_ha" {
   type        = bool
   default     = "false"
 }
+variable "register_controller" {
+  description = "If true the controller will be register and licensed with Avi Cloud Services. Variables with registration_ are required for registration to be successful"
+  type        = bool
+  default     = "false"
+}
+variable "registration_jwt" {
+  description = "Registration JWT Token for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
+variable "registration_email" {
+  description = "Registration email address for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
+variable "registration_account_id" {
+  description = "Registration account ID for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
 variable "create_networking" {
   description = "This variable controls the VPC and subnet creation for the Avi Controller. When set to false the custom_vpc_name and custom_subnetwork_name must be set."
   type        = bool
