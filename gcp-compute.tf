@@ -24,9 +24,9 @@ locals {
     zones                           = data.google_compute_zones.available.names
     controller_ha                   = var.controller_ha
     register_controller             = var.register_controller
-    registration_jwt                = var.registration_jwt
-    registration_email              = var.registration_email
-    registration_account_id         = var.registration_account_id
+    registration_jwt                = var.registration_settings.jwt_token
+    registration_email              = var.registration_settings.email
+    registration_account_id         = var.registration_settings.organization_id
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     cloud_router                    = var.create_networking ? var.vip_allocation_strategy == "ILB" ? google_compute_router.avi[0].name : null : null

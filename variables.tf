@@ -98,20 +98,11 @@ variable "register_controller" {
   type        = bool
   default     = "false"
 }
-variable "registration_jwt" {
-  description = "Registration JWT Token for Avi Cloud Services. This token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin"
-  type        = string
-  default     = ""
-}
-variable "registration_email" {
-  description = "Registration email address for Avi Cloud Services"
-  type        = string
-  default     = ""
-}
-variable "registration_account_id" {
-  description = "Registration account ID for Avi Cloud Services"
-  type        = string
-  default     = ""
+variable "registration_settings" {
+  description = "Registration settings for Avi Cloud Services. The Long Organization ID (organization_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin"
+  sensitive   = false
+  type        = object({ jwt_token = string, email = string, organization_id = string })
+  default     = { jwt_token = "", email = "", organization_id = "" }
 }
 variable "create_networking" {
   description = "This variable controls the VPC and subnet creation for the Avi Controller. When set to false the custom_vpc_name and custom_subnetwork_name must be set."
