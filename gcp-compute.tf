@@ -44,6 +44,7 @@ locals {
     create_gslb_se_group            = var.create_gslb_se_group
     se_ha_mode                      = var.se_ha_mode
     se_service_account              = var.se_service_account
+    upgrade_file_uri                = var.avi_patch_upgrade["upgrade_file_uri"]
   }
   controller_sizes = {
     small  = "custom-8-24576"
@@ -115,6 +116,10 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/avi-cloud-services-registration.yml"
   }
   provisioner "file" {
+    source      = "${path.module}/files/views_albservices.patch"
+    destination = "/home/admin/views_albservices.patch"
+  }
+  provisioner "file" {
     content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/avi-cleanup.yml"
@@ -130,5 +135,11 @@ resource "null_resource" "ansible_provisioner" {
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
       "echo Controller Registration Completed"
     ] : ["echo Controller Registration Skipped"]
+  }
+  provisioner "remote-exec" {
+    inline = var.avi_patch_upgrade["enabled"] ? [
+      "ansible-playbook avi-patch-upgrade.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
+      "echo patch upgrade completed"
+    ] : ["echo patch upgrade skipped"]
   }
 }
