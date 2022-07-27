@@ -44,7 +44,7 @@ locals {
     create_gslb_se_group            = var.create_gslb_se_group
     se_ha_mode                      = var.se_ha_mode
     se_service_account              = var.se_service_account
-    upgrade_file_uri                = var.avi_patch_upgrade["upgrade_file_uri"]
+    upgrade_file_uri                = var.avi_upgrade["upgrade_file_uri"]
   }
   controller_sizes = {
     small  = "custom-8-24576"
@@ -120,9 +120,9 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/avi-cloud-services-registration.yml"
   }
   provisioner "file" {
-    content = templatefile("${path.module}/files/avi-patch-upgrade.yml.tpl",
+    content = templatefile("${path.module}/files/avi-upgrade.yml.tpl",
     local.cloud_settings)
-    destination = "/home/admin/avi-patch-upgrade.yml"
+    destination = "/home/admin/avi-upgrade.yml"
   }
   provisioner "file" {
     content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
@@ -142,9 +142,9 @@ resource "null_resource" "ansible_provisioner" {
     ] : ["echo Controller Registration Skipped"]
   }
   provisioner "remote-exec" {
-    inline = var.avi_patch_upgrade["enabled"] ? [
-      "ansible-playbook avi-patch-upgrade.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
-      "echo patch upgrade completed"
-    ] : ["echo patch upgrade skipped"]
+    inline = var.avi_upgrade["enabled"] ? [
+      "ansible-playbook avi-upgrade.yml -e password=${var.controller_password} -e upgrade_type=${var.avi_upgrade["upgrade_type"]} >> ansible-playbook.log 2>> ansible-error.log",
+      "echo Avi upgrade completed"
+    ] : ["echo Avi upgrade skipped"]
   }
 }
