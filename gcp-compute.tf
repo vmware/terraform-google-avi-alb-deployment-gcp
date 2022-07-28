@@ -19,10 +19,10 @@ locals {
     vip_allocation_strategy         = var.vip_allocation_strategy
     zones                           = data.google_compute_zones.available.names
     controller_ha                   = var.controller_ha
-    register_controller             = var.register_controller
-    registration_jwt                = var.registration_settings.jwt_token
-    registration_email              = var.registration_settings.email
-    registration_account_id         = var.registration_settings.organization_id
+    register_controller             = var.register_controller.enabled
+    registration_jwt                = var.register_controller.jwt_token
+    registration_email              = var.register_controller.email
+    registration_account_id         = var.register_controller.organization_id
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     cloud_router                    = var.create_networking ? var.vip_allocation_strategy == "ILB" ? google_compute_router.avi[0].name : null : null
@@ -40,7 +40,7 @@ locals {
     create_gslb_se_group            = var.create_gslb_se_group
     se_ha_mode                      = var.se_ha_mode
     se_service_account              = var.se_service_account
-    upgrade_file_uri                = var.avi_upgrade["upgrade_file_uri"]
+    upgrade_file_uri                = var.avi_upgrade.upgrade_file_uri
   }
   controller_sizes = {
     small  = "custom-8-24576"
@@ -132,7 +132,7 @@ resource "null_resource" "ansible_provisioner" {
     ]
   }
   provisioner "remote-exec" {
-    inline = var.register_controller ? [
+    inline = var.register_controller["enabled"] ? [
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
       "echo Controller Registration Completed"
     ] : ["echo Controller Registration Skipped"]
