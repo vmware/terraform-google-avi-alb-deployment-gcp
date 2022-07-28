@@ -95,6 +95,8 @@ module "avi_controller_east" {
   dns_service_domain          = "east.domain"
   configure_dns_vs            = "true"
   dns_vs_settings             = { auto_allocate_ip = "true", auto_allocate_public_ip = "true", vs_ip = "", network = "192.168.252.0/24" }
+  create_gslb_se_group            = "true"
+  gslb_site_name                  = "East1"
 }
 module "avi_controller_west" {
   source  = "vmware/avi-alb-deployment-gcp/google"
