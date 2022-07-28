@@ -152,20 +152,50 @@ https://avinetworks.com/docs/latest/system-limits/
 ## Day 1 Ansible Configuration and Avi Resource Cleanup
 The module copies and runs an Ansible play for configuring the initial day 1 Avi config. The plays listed below can be reviewed by connecting to the Avi Controller by SSH. In an HA setup the first controller will have these files. 
 
-### avi-controller-gcp-all-in-one-play.yml
-This play will configure the Avi Cloud, Network, IPAM/DNS profiles, DNS Virtual Service, GSLB depending on the variables used by the module. The initial run of this play will be output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. 
+### avi-controller-aws-all-in-one-play.yml
+This play will configure the Avi Cloud, Network, IPAM/DNS profiles, DNS Virtual Service, GSLB depending on the variables used. The initial run of this play will output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. 
 
-Example run (appropriate variables should be used):
+Example run (appropriate variable values should be used):
 ```bash
-~$ ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password='${var.controller_password}' > ansible-playbook-run.log
+~$ ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} > ansible-playbook-run.log
+```
+
+### avi-upgrade.yml
+This play will upgrade or patch the Avi Controller and SEs depending on the variables used. When ran this play will output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. This play can be ran during the initial Terraform deployment with the avi_upgrade variable as shown in the example below:
+
+```hcl
+avi_upgrade = { enabled = "true", upgrade_type = "patch", upgrade_file_uri = "URL Copied From portal.avipulse.vmware.com"}
+```
+
+An full version upgrade can be done by changing changing the upgrade_type to "system". It is recommended to run this play in a lower environment before running in a production environment and is not recommended for a GSLB setup at this time.
+
+Example run (appropriate variable values should be used):
+```bash
+~$ ansible-playbook avi-upgrade.yml -e password=${var.controller_password} -e upgrade_type=${var.avi_upgrade.upgrade_type} -e upgrade_file_uri=${var.avi_upgrade.upgrade_file_uri} > ansible-playbook-run.log
+```
+
+### avi-cloud-services-registration.yml
+This play will register the Controller with Avi Cloud Services. This can be done to enable centralized licensing, live security threat updates, and proactive support. When ran this play will output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. This play can be ran during the initial Terraform deployment with the register_controller variable as shown in the example below:
+
+```hcl
+register_controller = { enabled = "true", jwt_token = "TOKEN", email = "EMAIL", organization_id = "LONG_ORG_ID" }
+```
+
+The organization_id can be found as the Long Organization ID field from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info.
+
+The jwt_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin.
+
+Example run (appropriate variable values should be used):
+```bash
+~$ ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} -e registration_account_id=${var.register_controller.organization_id} -e registration_email=${var.register_controller.email} -e registration_jwt=${var.register_controller.jwt_token} > ansible-playbook-run.log
 ```
 
 ### avi-cleanup.yml
 This play will disable all Virtual Services and delete all existing Avi service engines. This playbook should be ran before deleting the controller with terraform destroy to clean up the resources created by the Avi Controller. 
 
-Example run (appropriate variables should be used):
+Example run (appropriate variable values should be used):
 ```bash
-~$ ansible-playbook avi-cleanup.yml -e password='${var.controller_password}'
+~$ ansible-playbook avi-cleanup.yml -e password=${var.controller_password}
 ```
 ## Contributing
 
