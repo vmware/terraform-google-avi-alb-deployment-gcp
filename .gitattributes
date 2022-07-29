@@ -1,1 +1,2 @@
 files/* linguist-vendored
+*.tpl linguist-language=YAML
