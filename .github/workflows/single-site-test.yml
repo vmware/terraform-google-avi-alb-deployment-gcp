@@ -49,13 +49,19 @@ jobs:
           - avi_version: 20.1.6
             create_networking: true
             controller_ha: false
-          - avi_version: 21.1.1
+          - avi_version: 21.1.4
             create_networking: true
             controller_ha: false
           - avi_version: 20.1.6
             create_networking: true
             controller_ha: true
-          - avi_version: 21.1.1
+          - avi_version: 21.1.4
+            create_networking: true
+            controller_ha: true
+          - avi_version: 22.1.1
+            create_networking: true
+            controller_ha: false
+          - avi_version: 22.1.1
             create_networking: true
             controller_ha: true
       fail-fast: false
