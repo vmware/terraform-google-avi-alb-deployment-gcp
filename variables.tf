@@ -76,19 +76,19 @@ variable "gslb_domains" {
   default     = [""]
 }
 variable "configure_gslb_additional_sites" {
-  description = "Configure Additional GSLB Sites. The additional_gslb_sites, gslb_site_name, gslb_domains, and configure_dns_vs variables must also be set. Optionally the additional_gslb_sites variable can be used to add active GSLB sites"
+  description = "Configure additional GSLB Sites. The additional_gslb_sites, gslb_site_name, gslb_domains, and configure_dns_vs variables must also be set"
   type        = bool
   default     = "false"
 }
 variable "additional_gslb_sites" {
-  description = "The Names and IP addresses of the GSLB Sites that will be configured."
+  description = "The Names and IP addresses of the GSLB Sites that will be configured. If the Site is a controller cluster the ip_address_list should have the ip address of each controller. The configure_gslb_additional_sites variable must also be set to true for the sites to be added"
   type        = list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))
   default     = [{ name = "", ip_address_list = [""], dns_vs_name = "" }]
 }
 variable "create_gslb_se_group" {
   description = "Create a SE group for GSLB. The gslb_site_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
   type        = bool
-  default     = "true"
+  default     = "false"
 }
 variable "name_prefix" {
   description = "This prefix is appended to the names of the Controller and SEs"
@@ -267,7 +267,7 @@ variable "ntp_servers" {
 }
 variable "email_config" {
   description = "The Email settings that will be used for sending password reset information or for trigged alerts. The default setting will send emails directly from the Avi Controller"
-  sensitive   = true
+  sensitive   = false
   type        = object({ smtp_type = string, from_email = string, mail_server_name = string, mail_server_port = string, auth_username = string, auth_password = string })
   default     = { smtp_type = "SMTP_LOCAL_HOST", from_email = "admin@avicontroller.net", mail_server_name = "localhost", mail_server_port = "25", auth_username = "", auth_password = "" }
 }
