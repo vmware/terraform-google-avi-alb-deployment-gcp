@@ -156,8 +156,12 @@ func TestDeployment(t *testing.T) {
       }
       for index, controller := range controllerIPs {
          _ = index
-         testURL(t, controller, "", 200)
-         testURL(t, controller, "notfound", 404)
+         url := fmt.Sprintf("https://%s", controller)
+         badUrl := fmt.Sprintf("https://%s/notfound", controller)
+         http_helper.HttpGetWithRetry(t, url, nil, 200, "avi", 10, 10*time.Second)
+         http_helper.HttpGetWithRetry(t, badUrl, nil, 404, "avi", 10, 10*time.Second)
+         //testURL(t, controller, "", 200)
+         //testURL(t, controller, "notfound", 404)
       }
    })
 
@@ -201,8 +205,12 @@ func TestDeployment(t *testing.T) {
       }
       for index, controller := range controllerIPs {
          _ = index
-         testURL(t, controller, "", 200)
-         testURL(t, controller, "notfound", 404)
+         url := fmt.Sprintf("https://%s", controller)
+         badUrl := fmt.Sprintf("https://%s/notfound", controller)
+         http_helper.HttpGetWithRetry(t, url, nil, 200, "avi", 10, 10*time.Second)
+         http_helper.HttpGetWithRetry(t, badUrl, nil, 404, "avi", 10, 10*time.Second)
+         //testURL(t, controller, "", 200)
+         //testURL(t, controller, "notfound", 404)
       }
       
    })
@@ -213,7 +221,7 @@ func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
    tlsConfig := tls.Config{InsecureSkipVerify: true}
    url := fmt.Sprintf("%s://%s/%s", "https", endpoint, path)
    actionDescription := fmt.Sprintf("Calling %s", url)
-   output := retry.DoWithRetry(t, actionDescription, 10, 10 * time.Second, func() (int, error) {
+   output := retry.DoWithRetry(t, actionDescription, 10, 10 * time.Second, func() (string, error) {
       statusCode, body := http_helper.HttpGet(t, url, &tlsConfig)
       if statusCode == expectedStatus {
          logger.Logf(t, "Got expected status code %d from URL %s", expectedStatus, url)
