@@ -40,6 +40,7 @@ jobs:
       TF_VAR_configure_dns_vs: "true"
       TF_VAR_dns_vs_settings: '{ auto_allocate_ip=true, auto_allocate_public_ip=true, vs_ip = "", network = "192.168.250.0/24"}'
       TF_VAR_register_controller: '{ enabled = "${{ matrix.register_controller }}", jwt_token = "${{ secrets.jwt_token }}", email = "${{ secrets.email }}", organization_id = "${{ secrets.organization_id }}" }'
+      register_controller: '{ enabled = "${{ matrix.register_controller }}", jwt_token = "${{ secrets.jwt_token }}", email = "${{ secrets.email }}", organization_id = "${{ secrets.organization_id }}" }'
     defaults:
       run:
         shell: bash

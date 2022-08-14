@@ -82,6 +82,13 @@
         path: "serviceengine/{{ item.uuid }}"
       loop: "{{ se_results.obj.results }}"
 
+    - name: Env variable lookup
+      ansible.builtin.debug:
+        msg: "'{{ lookup('ansible.builtin.env', 'TF_VAR_register_controller') }}' is the register_controller environment variable."
+
+    - set_fact:
+        register_controller: "{{ lookup('ansible.builtin.env', 'TF_VAR_register_controller') }}"
+
     - name: Print register_controller variable
       ansible.builtin.debug:
         var: register_controller
