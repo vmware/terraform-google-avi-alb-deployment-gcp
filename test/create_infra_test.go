@@ -156,8 +156,8 @@ func TestDeployment(t *testing.T) {
       }
       for index, controller := range controllerIPs {
          _ = index
-         testURL(t, controller, "", 200, "Avi Vantage Controller")
-         testURL(t, controller, "notfound", 404, "not found")
+         testURL(t, controller, "", 200)
+         testURL(t, controller, "notfound", 404)
       }
    })
 
@@ -209,7 +209,7 @@ func TestDeployment(t *testing.T) {
 
 }
 
-func testURL(t *testing.T, endpoint string, path string, expectedStatus int, expectedBody string) {
+func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
    tlsConfig := tls.Config{InsecureSkipVerify: true}
    url := fmt.Sprintf("%s://%s/%s", "https", endpoint, path)
    actionDescription := fmt.Sprintf("Calling %s", url)
@@ -217,9 +217,9 @@ func testURL(t *testing.T, endpoint string, path string, expectedStatus int, exp
       statusCode, body := http_helper.HttpGet(t, url, &tlsConfig)
       if statusCode == expectedStatus {
          logger.Logf(t, "Got expected status code %d from URL %s", expectedStatus, url)
-         return body, nil
+         return statusCode, nil
       }
-      return "", fmt.Errorf("got status %d instead of the expected %d from %s", statusCode, expectedStatus, url)
+      return "", fmt.Errorf("Got status %d instead of the expected %d from %s", statusCode, expectedStatus, url)
    })
-   assert.Contains(t, output, expectedBody, "Body should contain expected text")
+   assert.Equal(t, output, expectedStatus, "Status code does not match what is expected")
 }
