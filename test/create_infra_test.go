@@ -158,7 +158,7 @@ func TestDeployment(t *testing.T) {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
          badUrl := fmt.Sprintf("https://%s/notfound", controller)
-         tlsConfig := *tls.Config{InsecureSkipVerify: true}
+         tlsConfig := &tls.Config{InsecureSkipVerify: true}
          http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "avi", 10, 10*time.Second)
          http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "avi", 10, 10*time.Second)
          //testURL(t, controller, "", 200)
@@ -208,7 +208,7 @@ func TestDeployment(t *testing.T) {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
          badUrl := fmt.Sprintf("https://%s/notfound", controller)
-         tlsConfig := *tls.Config{InsecureSkipVerify: true}
+         tlsConfig := &tls.Config{InsecureSkipVerify: true}
          http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "avi", 10, 10*time.Second)
          http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "avi", 10, 10*time.Second)
          //testURL(t, controller, "", 200)
