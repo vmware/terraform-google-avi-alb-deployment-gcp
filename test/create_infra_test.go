@@ -209,9 +209,11 @@ func TestDeployment(t *testing.T) {
          url := fmt.Sprintf("https://%s", controller)
          //badUrl := fmt.Sprintf("https://%s/notfound", controller)
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
-         validate := func(statusCode int) bool {
+         validate := func(statusCode int, body string) bool {
             isOk := statusCode == 200
-         return isOk }
+            hasBody := strings.Contains(body, " ")
+            return isOk && hasBody               
+        }
         //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
          //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
          http_helper.HttpGetWithRetryWithCustomValidation(t, url, tlsConfig, 10, 10*time.Second, validate)
