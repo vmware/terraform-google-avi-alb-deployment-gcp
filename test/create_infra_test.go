@@ -16,6 +16,7 @@ import (
    "time"
    "os"
    "crypto/tls"
+   "regexp"
 )
 
 func getTerraVars() map[string]interface{} {
@@ -133,6 +134,7 @@ func TestDeployment(t *testing.T) {
    // Run Controller tests for a single site deployment
    test_structure.RunTestStage(t, "singlesite_controller_tests", func() {
       var controllerIPs []string
+      var re = regexp.MustCompile(`ALB|Avi`)
       terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
       controllerInfo :=  terraform.OutputListOfObjects(t, terraformOptions, "controllers" )
       
@@ -157,10 +159,17 @@ func TestDeployment(t *testing.T) {
       for index, controller := range controllerIPs {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
-         badUrl := fmt.Sprintf("https://%s/notfound", controller)
+         //badUrl := fmt.Sprintf("https://%s/notfound", controller)
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
-         http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
-         http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
+         validate := func(statusCode int, body string) bool {
+            isOk := statusCode == 200
+            matchBody := re.MatchString(body)
+            //hasBody := strings.Contains(body, " ALB")
+            return isOk && matchBody              
+        }
+         http_helper.HttpGetWithRetryWithCustomValidation(t, url, tlsConfig, 10, 10*time.Second, validate)
+         //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
+         //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
          //testURL(t, controller, "", 200)
          //testURL(t, controller, "notfound", 404)
       }
@@ -169,6 +178,7 @@ func TestDeployment(t *testing.T) {
    // Run Controller tests for a GSLB deployment
    test_structure.RunTestStage(t, "gslb_controller_tests", func() {
       var controllerIPs []string
+      var re = regexp.MustCompile(`ALB|Avi`)
       terraformOptions := test_structure.LoadTerraformOptions(t, TerraformDir)
 
       controllersEast :=  terraform.OutputListOfObjects(t, terraformOptions, "controllers_east" )
@@ -211,8 +221,9 @@ func TestDeployment(t *testing.T) {
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
          validate := func(statusCode int, body string) bool {
             isOk := statusCode == 200
-            hasBody := strings.Contains(body, " ")
-            return isOk && hasBody               
+            matchBody := re.MatchString(body)
+            //hasBody := strings.Contains(body, " ALB")
+            return isOk && matchBody              
         }
         //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
          //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
