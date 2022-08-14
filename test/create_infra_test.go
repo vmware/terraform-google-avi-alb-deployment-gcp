@@ -207,10 +207,14 @@ func TestDeployment(t *testing.T) {
       for index, controller := range controllerIPs {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
-         badUrl := fmt.Sprintf("https://%s/notfound", controller)
+         //badUrl := fmt.Sprintf("https://%s/notfound", controller)
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
-         http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
-         http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
+         validate := func(statusCode int) bool {
+            isOk := statusCode == 200
+         return isOk }
+        //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
+         //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
+         http_helper.HttpGetWithRetryWithCustomValidation(t, url, tlsConfig, 10, 10*time.Second, validate)
          //testURL(t, controller, "", 200)
          //testURL(t, controller, "notfound", 404)
       }
