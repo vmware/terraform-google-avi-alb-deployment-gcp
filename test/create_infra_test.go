@@ -201,8 +201,8 @@ func TestDeployment(t *testing.T) {
       }
       for index, controller := range controllerIPs {
          _ = index
-         testURL(t, controller, "", 200, "avi")
-         testURL(t, controller, "notfound", 404, "not found")
+         testURL(t, controller, "", 200)
+         testURL(t, controller, "notfound", 404)
       }
       
    })
