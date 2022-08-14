@@ -213,7 +213,7 @@ func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
    tlsConfig := tls.Config{InsecureSkipVerify: true}
    url := fmt.Sprintf("%s://%s/%s", "https", endpoint, path)
    actionDescription := fmt.Sprintf("Calling %s", url)
-   output := retry.DoWithRetry(t, actionDescription, 10, 10 * time.Second, func() (string, error) {
+   output := retry.DoWithRetry(t, actionDescription, 10, 10 * time.Second, func() (int, error) {
       statusCode, body := http_helper.HttpGet(t, url, &tlsConfig)
       if statusCode == expectedStatus {
          logger.Logf(t, "Got expected status code %d from URL %s", expectedStatus, url)
