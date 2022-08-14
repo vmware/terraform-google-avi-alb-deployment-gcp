@@ -217,6 +217,7 @@ func TestDeployment(t *testing.T) {
 
 }
 
+/*
 func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
    tlsConfig := tls.Config{InsecureSkipVerify: true}
    url := fmt.Sprintf("%s://%s/%s", "https", endpoint, path)
@@ -225,9 +226,11 @@ func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
       statusCode, body := http_helper.HttpGet(t, url, &tlsConfig)
       if statusCode == expectedStatus {
          logger.Logf(t, "Got expected status code %d from URL %s", expectedStatus, url)
-         return statusCode, nil
+         return body, nil
       }
       return "", fmt.Errorf("Got status %d instead of the expected %d from %s", statusCode, expectedStatus, url)
    })
    assert.Equal(t, output, expectedStatus, "Status code does not match what is expected")
 }
+
+*/
