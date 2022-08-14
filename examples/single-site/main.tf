@@ -24,4 +24,5 @@ module "avi_controller_gcp" {
   dns_service_domain          = var.dns_service_domain
   configure_dns_vs            = var.configure_dns_vs
   dns_vs_settings             = var.dns_vs_settings
+  register_controller         = var.register_controller
 }

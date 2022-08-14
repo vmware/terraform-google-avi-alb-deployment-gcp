@@ -39,6 +39,7 @@ jobs:
       TF_VAR_dns_service_domain: "aviterraform.local"
       TF_VAR_configure_dns_vs: "true"
       TF_VAR_dns_vs_settings: '{ auto_allocate_ip=true, auto_allocate_public_ip=true, vs_ip = "", network = "192.168.250.0/24"}'
+      TF_VAR_register_controller: '{ enabled = "${{ matrix.register_controller }}", jwt_token = "${{ secrets.jwt_token }}", email = "${{ secrets.email }}", organization_id = "${{ secrets.organization_id }}" }'
     defaults:
       run:
         shell: bash
@@ -46,24 +47,30 @@ jobs:
     strategy:
       matrix:
         include:
-          - avi_version: 20.1.6
+          - avi_version: 20.1.9
             create_networking: true
             controller_ha: false
+            register_controller: false
+          - avi_version: 20.1.9
+            create_networking: true
+            controller_ha: true
+            register_controller: false
           - avi_version: 21.1.4
             create_networking: true
             controller_ha: false
-          - avi_version: 20.1.6
-            create_networking: true
-            controller_ha: true
+            register_controller: true
           - avi_version: 21.1.4
             create_networking: true
             controller_ha: true
+            register_controller: true
           - avi_version: 22.1.1
             create_networking: true
             controller_ha: false
+            register_controller: true
           - avi_version: 22.1.1
             create_networking: true
             controller_ha: true
+            register_controller: true
       fail-fast: false
         
 
@@ -82,7 +89,7 @@ jobs:
           go mod download
           pipx inject ansible-core avisdk requests --include-deps --include-apps
           pipx list
-          ansible-galaxy collection install vmware.alb
+          ansible-galaxy collection install git+https://github.com/vmware/ansible-collection-alb.git,eng
           echo $GCP_CREDS > /home/runner/gcp-creds.json
         env:
           GCP_CREDS: ${{ secrets.GCP_CREDS }}
@@ -101,7 +108,7 @@ jobs:
         if: ${{ always() }}
         run: |
           export controller_ip=$(terraform -chdir="../examples/single-site" output -no-color  -json | jq .controllers.value[0].public_ip_address)
-          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version
+          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version -e register_controller=$TF_VAR_register_controller
         
       - name: Run Terraform Destroy
         if: ${{ always() }}

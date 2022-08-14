@@ -10,6 +10,12 @@ variable "avi_version" {
   description = "The version of Avi that will be deployed"
   type        = string
 }
+variable "register_controller" {
+  description = "If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin"
+  sensitive   = false
+  type        = object({ enabled = bool, jwt_token = string, email = string, organization_id = string })
+  default     = { enabled = "false", jwt_token = "", email = "", organization_id = "" }
+}
 variable "controller_default_password" {
   description = "This is the default password for the Avi controller image and can be found in the image download page."
   type        = string

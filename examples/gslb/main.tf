@@ -26,6 +26,9 @@ module "avi_controller_east" {
   dns_service_domain          = "avieast.local"
   configure_dns_vs            = "true"
   dns_vs_settings             = { auto_allocate_ip = true, auto_allocate_public_ip = true, vs_ip = "", network = "192.168.252.0/24" }
+  create_gslb_se_group        = var.create_gslb_se_group
+  gslb_site_name              = "East1"
+  register_controller         = var.register_controller
 }
 module "avi_controller_west" {
   source = "../.."
@@ -55,4 +58,5 @@ module "avi_controller_west" {
   gslb_domains                    = ["avigslb.local"]
   configure_gslb_additional_sites = "true"
   additional_gslb_sites           = [{ name = "East1", ip_address_list = module.avi_controller_east.controllers[*].private_ip_address, dns_vs_name = "DNS-VS" }]
+  register_controller             = var.register_controller
 }

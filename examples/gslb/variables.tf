@@ -6,6 +6,12 @@ variable "avi_version" {
   description = "The version of Avi that will be deployed"
   type        = string
 }
+variable "register_controller" {
+  description = "If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin"
+  sensitive   = false
+  type        = object({ enabled = bool, jwt_token = string, email = string, organization_id = string })
+  default     = { enabled = "false", jwt_token = "", email = "", organization_id = "" }
+}
 variable "controller_default_password" {
   description = "This is the default password for the Avi controller image and can be found in the image download page."
   type        = string
@@ -60,4 +66,9 @@ variable "custom_subnetwork_west" {
   description = "This field can be used to specify an existing VPC subnetwork for the controller and SEs. The create_networking variable must also be set to false for this network to be used."
   type        = string
   default     = null
+}
+variable "create_gslb_se_group" {
+  description = "Create a SE group for GSLB. The gslb_site_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
+  type        = bool
+  default     = "true"
 }

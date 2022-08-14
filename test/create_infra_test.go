@@ -159,19 +159,13 @@ func TestDeployment(t *testing.T) {
       for index, controller := range controllerIPs {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
-         //badUrl := fmt.Sprintf("https://%s/notfound", controller)
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
          validate := func(statusCode int, body string) bool {
             isOk := statusCode == 200
             matchBody := re.MatchString(body)
-            //hasBody := strings.Contains(body, " ALB")
             return isOk && matchBody              
         }
          http_helper.HttpGetWithRetryWithCustomValidation(t, url, tlsConfig, 10, 10*time.Second, validate)
-         //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
-         //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
-         //testURL(t, controller, "", 200)
-         //testURL(t, controller, "notfound", 404)
       }
    })
 
@@ -217,39 +211,15 @@ func TestDeployment(t *testing.T) {
       for index, controller := range controllerIPs {
          _ = index
          url := fmt.Sprintf("https://%s", controller)
-         //badUrl := fmt.Sprintf("https://%s/notfound", controller)
          tlsConfig := &tls.Config{InsecureSkipVerify: true}
          validate := func(statusCode int, body string) bool {
             isOk := statusCode == 200
             matchBody := re.MatchString(body)
-            //hasBody := strings.Contains(body, " ALB")
             return isOk && matchBody              
         }
-        //http_helper.HttpGetWithRetry(t, url, tlsConfig, 200, "", 10, 10*time.Second)
-         //http_helper.HttpGetWithRetry(t, badUrl, tlsConfig, 404, "", 10, 10*time.Second)
          http_helper.HttpGetWithRetryWithCustomValidation(t, url, tlsConfig, 10, 10*time.Second, validate)
-         //testURL(t, controller, "", 200)
-         //testURL(t, controller, "notfound", 404)
       }
       
    })
 
 }
-
-/*
-func testURL(t *testing.T, endpoint string, path string, expectedStatus int) {
-   tlsConfig := tls.Config{InsecureSkipVerify: true}
-   url := fmt.Sprintf("%s://%s/%s", "https", endpoint, path)
-   actionDescription := fmt.Sprintf("Calling %s", url)
-   output := retry.DoWithRetry(t, actionDescription, 10, 10 * time.Second, func() (string, error) {
-      statusCode, body := http_helper.HttpGet(t, url, &tlsConfig)
-      if statusCode == expectedStatus {
-         logger.Logf(t, "Got expected status code %d from URL %s", expectedStatus, url)
-         return body, nil
-      }
-      return "", fmt.Errorf("Got status %d instead of the expected %d from %s", statusCode, expectedStatus, url)
-   })
-   assert.Equal(t, output, expectedStatus, "Status code does not match what is expected")
-}
-
-*/

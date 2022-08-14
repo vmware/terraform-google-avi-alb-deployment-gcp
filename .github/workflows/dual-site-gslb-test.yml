@@ -34,6 +34,8 @@ jobs:
       TF_VAR_custom_vpc_name: ${{ secrets.TF_VAR_CUSTOM_VPC_NAME }}
       TF_VAR_custom_subnetwork_west: ${{ secrets.TF_VAR_CUSTOM_SUBNETWORK_WEST }}
       TF_VAR_custom_subnetwork_east: ${{ secrets.TF_VAR_CUSTOM_SUBNETWORK_EAST }}
+      TF_VAR_register_controller: '{ enabled = "${{ matrix.register_controller }}", jwt_token = "${{ secrets.jwt_token }}", email = "${{ secrets.email }}", organization_id = "${{ secrets.organization_id }}" }'
+
     defaults:
       run:
         shell: bash
@@ -41,14 +43,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - avi_version: 20.1.7
+          - avi_version: 20.1.9
             controller_ha: false
-          - avi_version: 21.1.3
+            register_controller: false
+          - avi_version: 20.1.9
+            controller_ha: true
+            register_controller: false
+          - avi_version: 21.1.4
             controller_ha: false
-          - avi_version: 20.1.7
+            register_controller: true
+          - avi_version: 21.1.4
             controller_ha: true
-          - avi_version: 21.1.3
+            register_controller: true
+          - avi_version: 22.1.1
+            controller_ha: false
+            register_controller: true
+          - avi_version: 22.1.1
             controller_ha: true
+            register_controller: true
+          
       fail-fast: false
         
 
