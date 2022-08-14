@@ -5,8 +5,8 @@ package test
 import (
    "fmt"
    http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
-   "github.com/gruntwork-io/terratest/modules/logger"
-   "github.com/gruntwork-io/terratest/modules/retry"
+   //"github.com/gruntwork-io/terratest/modules/logger"
+   //"github.com/gruntwork-io/terratest/modules/retry"
    "github.com/gruntwork-io/terratest/modules/random"
    "github.com/gruntwork-io/terratest/modules/terraform"
    test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
@@ -15,7 +15,7 @@ import (
    "testing"
    "time"
    "os"
-   "crypto/tls"
+   //"crypto/tls"
 )
 
 func getTerraVars() map[string]interface{} {
