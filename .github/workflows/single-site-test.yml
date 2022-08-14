@@ -109,7 +109,7 @@ jobs:
         if: ${{ always() }}
         run: |
           export controller_ip=$(terraform -chdir="../examples/single-site" output -no-color  -json | jq .controllers.value[0].public_ip_address)
-          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version -e register_controller='$TF_VAR_register_controller'
+          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version -e register_controller="$TF_VAR_register_controller"
         
       - name: Run Terraform Destroy
         if: ${{ always() }}
