@@ -93,6 +93,10 @@
       ansible.builtin.debug:
         var: register_controller
 
+    - name: Print register_controller variable
+      ansible.builtin.debug:
+        var: register_controller['enabled']
+
     - set_fact:
         controller_name: "{{ name_prefix }}-{{ gslb_site_name }}-cluster"
         controller_description: "{{ name_prefix }} {{ gslb_site_name }} Cluster"
