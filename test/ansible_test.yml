@@ -14,6 +14,11 @@
     controller_ha: false
     se_name_prefix: "{{ name_prefix }}"
     verify_gslb: false
+    register_controller:
+      enabled: "false"
+      jwt_token: ""
+      email: ""
+      organization_id: ""
   tasks:
     - name: Verify Cluster HA Status
       block:
@@ -22,7 +27,6 @@
             minutes: 10
           when: verify_gslb == false
           
-
         - name: Verify connection to the Avi Controller is ready
           uri:
             url: "https://{{ controller_ip }}/api/cloud?name=Default-Cloud"
@@ -39,7 +43,7 @@
             http_method: get
             path: "cluster/runtime"
           until: cluster_runtime.obj.cluster_state.progress == 100 and cluster_runtime.obj.cluster_state.state == "CLUSTER_UP_HA_ACTIVE"
-          retries: 200
+          retries: 30
           delay: 30
           register: cluster_runtime
         
@@ -97,7 +101,22 @@
       ansible.builtin.debug:
         var: system_config
         verbosity: 1
-    
+
+    - name: Cloud Services Check
+      block: 
+      - name: Get Controller License Status
+        avi_api_session:
+          avi_credentials: "{{ avi_credentials }}"
+          http_method: get
+          path: "licensing/status"
+        register: license_status
+
+      - name: Test Avi Cloud Services Registration
+        fail:
+          msg: The controller is not registered and connected to Avi Cloud Services
+        when: license_status.obj.saas_status.connected != true and license_status.obj.saas_status.enabled != true
+      when: register_controller.enabled == true
+
     - name: Get SE Group Config
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"

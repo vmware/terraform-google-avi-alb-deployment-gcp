@@ -5,7 +5,11 @@
   collections:
     - vmware.alb
   vars:
-    controller: "{{ controller_ip }}"
+    avi_credentials:
+        controller: "{{ controller_ip }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        api_version: "{{ avi_version }}"
     username: admin
     cloud_name: "Default-Cloud"
     avi_version: "{{ avi_version }}"
@@ -21,9 +25,7 @@
   tasks:
     - name: Remove all DNS Service Refs from System Configuration
       avi_api_session:
-        controller: "{{ controller }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        avi_credentials: "{{ avi_credentials }}"
         http_method: patch
         path: "systemconfiguration"
         tenant: "admin"
@@ -33,9 +35,7 @@
 
     - name: Get Virtual Service Information
       avi_api_session:
-        controller: "{{ controller }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        avi_credentials: "{{ avi_credentials }}"
         http_method: get
         path: virtualservice
         tenant: "*"
@@ -49,9 +49,7 @@
 
     - name: Delete all Virtual Services
       avi_api_session:
-        controller: "{{ controller }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        avi_credentials: "{{ avi_credentials }}"
         http_method: delete
         path: "virtualservice/{{ item.uuid }}"
         tenant: "*"
@@ -59,9 +57,7 @@
 
     - name: Get Service Engine Information
       avi_api_session:
-        controller: "{{ controller }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        avi_credentials: "{{ avi_credentials }}"
         http_method: get
         path: serviceengine
         tenant: "*"
@@ -75,39 +71,22 @@
 
     - name: Delete all Service Engines
       avi_api_session:
-        controller: "{{ controller }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        avi_credentials: "{{ avi_credentials }}"
         http_method: delete
         path: "serviceengine/{{ item.uuid }}"
       loop: "{{ se_results.obj.results }}"
 
-    - name: Env variable lookup
-      ansible.builtin.debug:
-        msg: "'{{ lookup('ansible.builtin.env', 'TF_VAR_register_controller') }}' is the register_controller environment variable."
-
-    - set_fact:
-        register_controller: "{{ lookup('ansible.builtin.env', 'TF_VAR_register_controller') }}"
-
-    - name: Print register_controller variable
-      ansible.builtin.debug:
-        var: register_controller
-
-    - name: Print register_controller variable
-      ansible.builtin.debug:
-        var: register_controller['enabled']
-
     - set_fact:
         controller_name: "{{ name_prefix }}-{{ gslb_site_name }}-cluster"
         controller_description: "{{ name_prefix }} {{ gslb_site_name }} Cluster"
-      when: (register_controller['enabled'] == "true" and configure_gslb == "true") or
-            (register_controller['enabled'] == "true" and create_gslb_se_group == "true")
+      when: (register_controller.enabled == "true" and configure_gslb == "true") or
+            (register_controller.enabled == "true" and create_gslb_se_group == "true")
 
     - set_fact:
         controller_name: "{{ name_prefix }}-cluster"
         controller_description: "{{ name_prefix }} Cluster"
       when:
-        - register_controller['enabled'] == "true"
+        - register_controller.enabled == "true"
         - configure_gslb == "false"
         - create_gslb_se_group == "false"
 
@@ -132,7 +111,7 @@
         enable_user_agent_db_sync: True
         enable_ip_reputation: True
         enable_appsignature_sync: True
-      when: register_controller['enabled'] == "true"
+      when: register_controller.enabled == "true"
 
     - name: Pause for Avi Controller to delete Cloud Resources
       pause:
