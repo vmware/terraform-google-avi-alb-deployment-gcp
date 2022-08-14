@@ -15,7 +15,7 @@ import (
    "testing"
    "time"
    "os"
-   //"crypto/tls"
+   "crypto/tls"
 )
 
 func getTerraVars() map[string]interface{} {
