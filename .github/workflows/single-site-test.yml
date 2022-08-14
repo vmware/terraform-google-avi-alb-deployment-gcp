@@ -39,7 +39,7 @@ jobs:
       TF_VAR_dns_service_domain: "aviterraform.local"
       TF_VAR_configure_dns_vs: "true"
       TF_VAR_dns_vs_settings: '{ auto_allocate_ip=true, auto_allocate_public_ip=true, vs_ip = "", network = "192.168.250.0/24"}'
-      TF_VAR_register_controller: '{ enabled = "${{ matrix.register_controller }}", jwt_token = "${{ secrets.jwt_token }}", email = "${{ secrets.email }}", organization_id = "${{ secrets.organization_id }}" }'
+      TF_VAR_register_controller: "{ enabled = '${{ matrix.register_controller }}', jwt_token = '${{ secrets.jwt_token }}'', email = '${{ secrets.email }}', organization_id = '${{ secrets.organization_id }}' }"
     defaults:
       run:
         shell: bash
@@ -108,7 +108,7 @@ jobs:
         if: ${{ always() }}
         run: |
           export controller_ip=$(terraform -chdir="../examples/single-site" output -no-color  -json | jq .controllers.value[0].public_ip_address)
-          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version -e register_controller='$TF_VAR_register_controller'
+          ansible-playbook ansible_avi_cleanup.yml -e password=$TF_VAR_controller_password -e controller_ip=$controller_ip -e avi_version=$TF_VAR_avi_version -e register_controller=$TF_VAR_register_controller
         
       - name: Run Terraform Destroy
         if: ${{ always() }}
