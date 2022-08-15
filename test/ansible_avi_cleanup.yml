@@ -95,4 +95,4 @@
 
     - name: Pause for Avi Controller to delete Cloud Resources
       pause:
-        minutes: 3
+        minutes: 5
