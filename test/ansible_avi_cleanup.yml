@@ -76,41 +76,21 @@
         path: "serviceengine/{{ item.uuid }}"
       loop: "{{ se_results.obj.results }}"
 
-    - set_fact:
-        controller_name: "{{ name_prefix }}-{{ gslb_site_name }}-cluster"
-        controller_description: "{{ name_prefix }} {{ gslb_site_name }} Cluster"
-      when: (register_controller.enabled == "true" and configure_gslb == "true") or
-            (register_controller.enabled == "true" and create_gslb_se_group == "true")
-
-    - set_fact:
-        controller_name: "{{ name_prefix }}-cluster"
-        controller_description: "{{ name_prefix }} Cluster"
-      when:
-        - register_controller.enabled == "true"
-        - configure_gslb == "false"
-        - create_gslb_se_group == "false"
-
     - name: Cloud Services Deregistration
       vmware.alb.avi_pulse_registration:
         avi_credentials: "{{ avi_credentials }}"
         state: absent
         jwt_token: "{{ register_controller.jwt_token }}"
-        name: "{{ controller_name }}"
-        description: "{{ controller_description }}"
+        name: "controller"
+        description: "controller description"
         email: "{{ register_controller.email }}"
         account_id: "{{ register_controller.organization_id }}"
-        optins: present
-        enable_pulse_case_management: True
         case_config:
           enable_auto_case_creation_on_controller_failure: False
           enable_auto_case_creation_on_se_failure: False
-        enable_pulse_waf_management: True
         waf_config:
           enable_waf_signatures_notifications: True
           enable_auto_download_waf_signatures: True
-        enable_user_agent_db_sync: True
-        enable_ip_reputation: True
-        enable_appsignature_sync: True
       when: register_controller.enabled == "true"
 
     - name: Pause for Avi Controller to delete Cloud Resources
