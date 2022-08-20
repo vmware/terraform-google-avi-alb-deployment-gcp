@@ -25,6 +25,11 @@ variable "controller_size" {
     error_message = "Acceptable values are small, medium, or large."
   }
 }
+variable "configure_controller" {
+  description = "Configure the Avi Controller via Ansible after controller deployment. If set to false all configuration must be done manually with the desired config. The avi-controller-gcp-all-in-one-play.yml Ansible play will still be generated and copied to the first controller in the cluster"
+  type        = bool
+  default     = "true"
+}
 variable "configure_ipam_profile" {
   description = "Configure Avi IPAM Profile for Virtual Service Address Allocation. If set to true the virtualservice_network variable must also be set"
   type        = bool

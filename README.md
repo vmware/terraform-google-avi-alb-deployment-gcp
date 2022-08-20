@@ -152,12 +152,12 @@ https://avinetworks.com/docs/latest/system-limits/
 ## Day 1 Ansible Configuration and Avi Resource Cleanup
 The module copies and runs an Ansible play for configuring the initial day 1 Avi config. The plays listed below can be reviewed by connecting to the Avi Controller by SSH. In an HA setup the first controller will have these files. 
 
-### avi-controller-aws-all-in-one-play.yml
+### avi-controller-gcp-all-in-one-play.yml
 This play will configure the Avi Cloud, Network, IPAM/DNS profiles, DNS Virtual Service, GSLB depending on the variables used. The initial run of this play will output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. 
 
 Example run (appropriate variable values should be used):
 ```bash
-~$ ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} > ansible-playbook-run.log
+~$ ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password=${var.controller_password} > ansible-playbook-run.log
 ```
 
 ### avi-upgrade.yml
@@ -263,6 +263,7 @@ No modules.
 | <a name="input_avi_upgrade"></a> [avi\_upgrade](#input\_avi\_upgrade) | This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade\_file\_uri key. Valid upgrade\_type values are patch or system | `object({ enabled = bool, upgrade_type = string, upgrade_file_uri = string })` | <pre>{<br>  "enabled": "false",<br>  "upgrade_file_uri": "",<br>  "upgrade_type": "patch"<br>}</pre> | no |
 | <a name="input_avi_version"></a> [avi\_version](#input\_avi\_version) | The version of Avi that will be deployed | `string` | n/a | yes |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |
+| <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Controller via Ansible after controller deployment. If set to false all configuration must be done manually with the desired config. The avi-controller-gcp-all-in-one-play.yml Ansible play will still be generated and copied to the first controller in the cluster | `bool` | `"true"` | no |
 | <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns\_service\_domain variable must also be set | `bool` | `"false"` | no |
 | <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create DNS Virtual Service. The configure\_dns\_profile and configure\_ipam\_profile variables must be set to true and their associated configuration variables must also be set | `bool` | `"false"` | no |
 | <a name="input_configure_firewall_se_data"></a> [configure\_firewall\_se\_data](#input\_configure\_firewall\_se\_data) | Configure Firewall rules for SE dataplane traffic. If set the firewall\_se\_data\_rules and firewall\_se\_data\_source\_range must be set | `bool` | `"false"` | no |

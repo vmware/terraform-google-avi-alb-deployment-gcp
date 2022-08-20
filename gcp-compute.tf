@@ -124,10 +124,10 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/avi-cleanup.yml"
   }
   provisioner "remote-exec" {
-    inline = [
+    inline = var.configure_controller ? [
       "ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
-    ]
+    ] : ["ansible-playbook avi-controller-gcp-all-in-one-play.yml --tags register_controller -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log"]
   }
   provisioner "remote-exec" {
     inline = var.register_controller["enabled"] ? [
