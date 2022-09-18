@@ -1,3 +1,5 @@
+# Copyright 2022 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
 ---
 - name: Avi Controller Configuration
   hosts: localhost
@@ -99,6 +101,7 @@
         port: 443
         timeout: 600
         sleep: 5
+
     - name: Configure System Configurations
       avi_systemconfiguration:
         avi_credentials: "{{ avi_credentials }}"
@@ -162,6 +165,7 @@
           gcp_service_account_email: "{{ gcp_service_account_email }}"
 %{ endif ~}
       register: avi_cloud
+
     - name: Set Backup Passphrase
       avi_backupconfiguration:
         avi_credentials: "{{ avi_credentials }}"
@@ -169,6 +173,7 @@
         name: Backup-Configuration
         backup_passphrase: "{{ password }}"
         upload_to_remote_host: false
+
 %{ if se_ha_mode == "active/active" ~}
     - name: Configure SE-Group
       avi_api_session:
@@ -193,6 +198,7 @@
           realtime_se_metrics:
             duration: "60"
             enabled: true
+
 %{ endif ~}
 %{ if se_ha_mode == "n+m" ~}
     - name: Configure SE-Group
@@ -218,6 +224,7 @@
           realtime_se_metrics:
             duration: "60"
             enabled: true
+
 %{ endif ~}
 %{ if se_ha_mode == "active/standby" ~}
     - name: Configure SE-Group
@@ -651,7 +658,6 @@
         state: absent
 
 %{ if avi_upgrade.enabled || register_controller.enabled  ~}
-
     - name: Verify Cluster State if avi_upgrade or register_controller plays will be ran
       block:
         - name: Pause for 8 minutes for Cluster to form

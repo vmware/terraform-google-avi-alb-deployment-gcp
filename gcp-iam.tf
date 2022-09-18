@@ -17,7 +17,7 @@ resource "google_project_iam_member" "avi_autoscaling_role" {
   member  = "serviceAccount:${data.google_service_account.avi.email}"
 }
 resource "google_project_iam_member" "avi_ilb_byoip_role" {
-  count   = var.create_iam ? var.vip_allocation_strategy == "ILB" ? 1 : 0 : 0
+  count   = var.create_iam && var.vip_allocation_strategy == "ILB" ? 1 : 0
   project = var.service_engine_project != "" ? var.service_engine_project : var.project
   role    = google_project_iam_custom_role.ilb_byoip[0].id
   member  = "serviceAccount:${data.google_service_account.avi.email}"
@@ -41,7 +41,7 @@ resource "google_project_iam_member" "avi_cluster_vip_role" {
   member  = "serviceAccount:${data.google_service_account.avi.email}"
 }
 resource "google_project_iam_member" "avi_se_service_account_role" {
-  count   = var.create_iam ? var.se_service_account != "" ? 1 : 0 : 0
+  count   = var.create_iam && var.se_service_account != "" ? 1 : 0
   project = var.service_engine_project != "" ? var.service_engine_project : var.project
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${data.google_service_account.avi.email}"
@@ -140,7 +140,7 @@ resource "google_project_iam_custom_role" "autoscaling_se" {
   ]
 }
 resource "google_project_iam_custom_role" "ilb_byoip" {
-  count       = var.create_iam ? var.vip_allocation_strategy == "ILB" ? 1 : 0 : 0
+  count       = var.create_iam && var.vip_allocation_strategy == "ILB" ? 1 : 0
   role_id     = "${var.name_prefix}_Avi_ILB_BYOIP_Project_Role"
   project     = var.service_engine_project != "" ? var.service_engine_project : var.project
   stage       = "BETA"
