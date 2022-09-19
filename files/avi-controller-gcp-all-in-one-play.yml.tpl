@@ -445,9 +445,9 @@
               application_profile_ref: /api/applicationprofile?name=System-DNS
               network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
               analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-              %{ if configure_gslb || create_gslb_se_group }
+%{ if configure_gslb || create_gslb_se_group ~}
               se_group_ref: "{{ gslb_se_group.obj.url }}"
-              %{ endif}
+%{ endif ~}
               cloud_ref: "{{ avi_cloud.obj.url }}"
               services:
               - port: 53
