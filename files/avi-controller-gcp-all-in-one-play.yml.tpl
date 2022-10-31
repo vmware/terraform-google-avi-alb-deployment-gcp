@@ -82,10 +82,14 @@
 %{ endif ~}
   tasks:
     - name: Wait for Controller to become ready
-      wait_for:
-        port: 443
-        timeout: 600
-        sleep: 5
+      uri:
+        url: "https://localhost/api/initial-data"
+        validate_certs: no
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 300
+      delay: 10
 
     - name: Configure System Configurations
       avi_systemconfiguration:
@@ -430,10 +434,6 @@
               fqdn: "dns.{{ configure_dns_profile.usable_domains.0 }}"
             name: vsvip-DNS-VS-Default-Cloud
           register: vsvip_results
-
-        - name: Display DNS VS VIP
-          ansible.builtin.debug:
-            var: vsvip_results
 
         - name: Create DNS Virtual Service
           avi_api_session:
