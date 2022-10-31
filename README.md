@@ -65,7 +65,21 @@ output "controller_address" {
   value = module.avi_controller_gcp.controllers
 } 
 ```
-## GSLB Deployment Example
+## GSLB Deployment
+For GSLB to be configured successfully the configure_gslb and configure_dns_vs variables must be configured. By default a new Service Engine Group (g-dns) and user (gslb-admin) will be created for the configuration. 
+
+The following is a description of the configure_gslb variable parameters and their usage:
+| Parameter   | Description | Type |
+| ----------- | ----------- | ----------- |
+| enabled      | Must be set to "true" for Active GSLB sites | bool
+| leader      | Must be set to "true" for only one GSLB site that will be the leader | bool
+| site_name   | Name of the GSLB site   | string
+| domains   | List of GSLB domains that will be configured | list(string)
+| create_se_group | Determines whether a g-dns SE group will be created        | bool
+| se_size   | The CPU, Memory, Disk Size of the Service Engines. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine | string
+| additional_sites   | Additional sites that will be configured. This parameter should only be set for the primary GSLB site | string
+
+The example below shows a GSLB deployment with 2 regions utilized.
 ```hcl
 terraform {
   backend "local" {
@@ -80,7 +94,7 @@ module "avi_controller_east" {
   custom_vpc_name             = "vpc"
   custom_subnetwork_name      = "subnet-east-1"
   create_iam                  = "false"
-  avi_version                 = "21.1.1"
+  avi_version                 = "22.1.2"
   controller_public_address   = "true"
   service_account_email       = "<email>@<account>.iam.gserviceaccount.com"
   controller_ha               = "true"
@@ -91,12 +105,9 @@ module "avi_controller_east" {
   project                     = "<project>"
   configure_ipam_profile      = "true"
   ipam_networks               = [{ network = "192.168.252.0/24" , static_pool = ["192.168.252.1", "192.168.252.254"]}]
-  configure_dns_profile       = "true"
-  dns_service_domain          = "east.domain"
-  configure_dns_vs            = "true"
-  dns_vs_settings             = { auto_allocate_ip = "true", auto_allocate_public_ip = "true", vs_ip = "", network = "192.168.252.0/24" }
-  create_gslb_se_group        = "true"
-  gslb_site_name              = "East1"
+  configure_dns_profile       = { "enabled" = "true", usable_domains = ["east.avidemo.net"] }
+  configure_dns_vs            = { "enabled" = "true", allocate_public_ip = "false", network = "192.168.252.0/24" }
+  configure_gslb              = { enabled = "true", site_name = "East1" }
 }
 module "avi_controller_west" {
   source  = "vmware/avi-alb-deployment-gcp/google"
@@ -107,7 +118,7 @@ module "avi_controller_west" {
   custom_vpc_name                 = "vpc"
   custom_subnetwork_name          = "subnet-west-1"
   create_iam                      = "false"
-  avi_version                     = "21.1.1"
+  avi_version                     = "22.1.2"
   controller_public_address       = "true"
   service_account_email           = "<email>@<project>.iam.gserviceaccount.com"
   controller_ha                   = "true"
@@ -118,15 +129,9 @@ module "avi_controller_west" {
   project                         = "<project>"
   configure_ipam_profile          = "true"
   ipam_networks                   = [{ network = "192.168.251.0/24" , static_pool = ["192.168.251.1", "192.168.251.254"]}]
-  configure_dns_profile           = "true"
-  dns_service_domain              = "west.domain"
-  configure_dns_vs                = "true"
-  dns_vs_settings                 = { auto_allocate_ip = "true", auto_allocate_public_ip = "true", vs_ip = "", network = "192.168.251.0/24" }
-  configure_gslb                  = "true"
-  gslb_site_name                  = "West1"
-  gslb_domains                    = ["gslb.domain"]
-  configure_gslb_additional_sites = "true"
-  additional_gslb_sites           = [{name = "East1", ip_address = module.avi_controller_east.controllers[*].private_ip_address , dns_vs_name = "DNS-VS"}]
+  configure_dns_profile           = { "enabled" = "true", allocate_public_ip = "false", network = "192.168.251.0/24" }
+  configure_dns_vs            = { "enabled" = "true", usable_domains = ["west.avidemo.net"] }
+  configure_gslb              = { enabled = "true", site_name = "West1", domains = ["gslb.avidemo.net"], [{name = "East1", ip_address_list = module.avi_controller_east.controllers[*].private_ip_address }] }
 }
 output "west_controller_ip" { 
   value = module.avi_controller_west.controllers
@@ -258,17 +263,15 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_gslb_sites"></a> [additional\_gslb\_sites](#input\_additional\_gslb\_sites) | The Names and IP addresses of the GSLB Sites that will be configured. If the Site is a controller cluster the ip\_address\_list should have the ip address of each controller. The configure\_gslb\_additional\_sites variable must also be set to true for the sites to be added | `list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))` | <pre>[<br>  {<br>    "dns_vs_name": "",<br>    "ip_address_list": [<br>      ""<br>    ],<br>    "name": ""<br>  }<br>]</pre> | no |
 | <a name="input_avi_subnet"></a> [avi\_subnet](#input\_avi\_subnet) | The CIDR that will be used for creating a subnet in the Avi VPC | `string` | `"10.255.1.0/24"` | no |
 | <a name="input_avi_upgrade"></a> [avi\_upgrade](#input\_avi\_upgrade) | This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade\_file\_uri key. Valid upgrade\_type values are patch or system | `object({ enabled = bool, upgrade_type = string, upgrade_file_uri = string })` | <pre>{<br>  "enabled": "false",<br>  "upgrade_file_uri": "",<br>  "upgrade_type": "patch"<br>}</pre> | no |
 | <a name="input_avi_version"></a> [avi\_version](#input\_avi\_version) | The version of Avi that will be deployed | `string` | n/a | yes |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |
 | <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Controller via Ansible after controller deployment. If set to false all configuration must be done manually with the desired config. The avi-controller-gcp-all-in-one-play.yml Ansible play will still be generated and copied to the first controller in the cluster | `bool` | `"true"` | no |
-| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns\_service\_domain variable must also be set | `bool` | `"false"` | no |
-| <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create DNS Virtual Service. The configure\_dns\_profile and configure\_ipam\_profile variables must be set to true and their associated configuration variables must also be set | `bool` | `"false"` | no |
+| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable\_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI | <pre>object({<br>    enabled        = bool,<br>    type           = optional(string, "AVI"),<br>    usable_domains = list(string),<br>    ttl            = optional(string, "30"),<br>    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))<br>  })</pre> | <pre>{<br>  "enabled": false,<br>  "type": "AVI",<br>  "usable_domains": []<br>}</pre> | no |
+| <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The subnet\_name parameter must be an existing AWS Subnet. If the allocate\_public\_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM | <pre>object({<br>    enabled            = bool,<br>    allocate_public_ip = optional(bool, false),<br>    network            = string,<br>    auto_allocate_ip   = optional(bool, true),<br>    vs_ip              = optional(string)<br>  })</pre> | <pre>{<br>  "enabled": "false",<br>  "network": ""<br>}</pre> | no |
 | <a name="input_configure_firewall_se_data"></a> [configure\_firewall\_se\_data](#input\_configure\_firewall\_se\_data) | Configure Firewall rules for SE dataplane traffic. If set the firewall\_se\_data\_rules and firewall\_se\_data\_source\_range must be set | `bool` | `"false"` | no |
-| <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
-| <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |
+| <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configures GSLB. In addition the configure\_dns\_vs variable must also be set for GSLB to be configured. See the GSLB Deployment README section for more information. | <pre>object({<br>    enabled          = bool,<br>    leader           = optional(bool, false),<br>    site_name        = string,<br>    domains          = optional(list(string)),<br>    create_se_group  = optional(bool, true),<br>    se_size          = optional(list(string), ["2", "8", "30"]),<br>    additional_sites = optional(list(object({ name = string, ip_address_list = list(string) })))<br>  })</pre> | <pre>{<br>  "domains": [<br>    ""<br>  ],<br>  "enabled": "false",<br>  "site_name": ""<br>}</pre> | no |
 | <a name="input_configure_ipam_profile"></a> [configure\_ipam\_profile](#input\_configure\_ipam\_profile) | Configure Avi IPAM Profile for Virtual Service Address Allocation. If set to true the virtualservice\_network variable must also be set | `bool` | `"false"` | no |
 | <a name="input_controller_default_password"></a> [controller\_default\_password](#input\_controller\_default\_password) | This is the default password for the Avi controller image and can be found in the image download page. | `string` | n/a | yes |
 | <a name="input_controller_ha"></a> [controller\_ha](#input\_controller\_ha) | If true a HA controller cluster is deployed and configured | `bool` | `"false"` | no |
@@ -278,7 +281,6 @@ No modules.
 | <a name="input_controller_size"></a> [controller\_size](#input\_controller\_size) | This value determines the number of vCPUs and memory allocated for the Avi Controller. Possible values are small, medium, or large. | `string` | `"small"` | no |
 | <a name="input_create_cloud_router"></a> [create\_cloud\_router](#input\_create\_cloud\_router) | This variable is used to create a GCP Cloud Router when both the create\_networking variable = true and the vip\_allocation\_strategy = ILB | `bool` | `"false"` | no |
 | <a name="input_create_firewall_rules"></a> [create\_firewall\_rules](#input\_create\_firewall\_rules) | This variable controls the VPC firewall rule creation for the Avi deployment. When set to false the necessary firewall rules must be in place before the deployment | `bool` | `"true"` | no |
-| <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. The gslb\_site\_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure\_gslb is set to true a SE group will be created automatically | `bool` | `"false"` | no |
 | <a name="input_create_iam"></a> [create\_iam](#input\_create\_iam) | Create IAM Roles and Role Bindings necessary for the Avi GCP Full Access Cloud. If not set the Roles and permissions in this document must be associated with the controller service account - https://Avinetworks.com/docs/latest/gcp-full-access-roles-and-permissions/ | `bool` | `"false"` | no |
 | <a name="input_create_networking"></a> [create\_networking](#input\_create\_networking) | This variable controls the VPC and subnet creation for the Avi Controller. When set to false the custom\_vpc\_name and custom\_subnetwork\_name must be set. | `bool` | `"true"` | no |
 | <a name="input_custom_machine_type"></a> [custom\_machine\_type](#input\_custom\_machine\_type) | This value overides the machine type used for the Avi Controller | `string` | `""` | no |
@@ -286,15 +288,10 @@ No modules.
 | <a name="input_custom_vpc_name"></a> [custom\_vpc\_name](#input\_custom\_vpc\_name) | This field can be used to specify an existing VPC for the controller and SEs. The create\_networking variable must also be set to false for this network to be used. | `string` | `null` | no |
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | The optional DNS search domain that will be used by the controller | `string` | `""` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | The optional DNS servers that will be used for local DNS resolution by the controller. Example ["8.8.4.4", "8.8.8.8"] | `list(string)` | `null` | no |
-| <a name="input_dns_service_domain"></a> [dns\_service\_domain](#input\_dns\_service\_domain) | The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com | `string` | `""` | no |
-| <a name="input_dns_vs_settings"></a> [dns\_vs\_settings](#input\_dns\_vs\_settings) | The DNS Virtual Service settings. With the auto\_allocate\_ip option is set to "true" the VS IP address will be allocated via an IPAM profile. Example:{ auto\_allocate\_ip = "true", auto\_allocate\_public\_ip = "true", vs\_ip = "", network = "192.168.20.0/24" } | `object({ auto_allocate_ip = bool, auto_allocate_public_ip = bool, vs_ip = string, network = string })` | `null` | no |
 | <a name="input_email_config"></a> [email\_config](#input\_email\_config) | The Email settings that will be used for sending password reset information or for trigged alerts. The default setting will send emails directly from the Avi Controller | `object({ smtp_type = string, from_email = string, mail_server_name = string, mail_server_port = string, auth_username = string, auth_password = string })` | <pre>{<br>  "auth_password": "",<br>  "auth_username": "",<br>  "from_email": "admin@avicontroller.net",<br>  "mail_server_name": "localhost",<br>  "mail_server_port": "25",<br>  "smtp_type": "SMTP_LOCAL_HOST"<br>}</pre> | no |
 | <a name="input_firewall_controller_allow_source_range"></a> [firewall\_controller\_allow\_source\_range](#input\_firewall\_controller\_allow\_source\_range) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default | `string` | `"0.0.0.0/0"` | no |
 | <a name="input_firewall_se_data_rules"></a> [firewall\_se\_data\_rules](#input\_firewall\_se\_data\_rules) | The ports allowed for Virtual Services hosted on Services Engines. The configure\_firewall\_se\_data variable must be set to true for this rule to be created | `list(object({ protocol = string, port = list(string) }))` | <pre>[<br>  {<br>    "port": [<br>      "443",<br>      "53"<br>    ],<br>    "protocol": "tcp"<br>  },<br>  {<br>    "port": [<br>      "53"<br>    ],<br>    "protocol": "udp"<br>  }<br>]</pre> | no |
 | <a name="input_firewall_se_data_source_range"></a> [firewall\_se\_data\_source\_range](#input\_firewall\_se\_data\_source\_range) | The IP range allowed to access Virtual Services hosted on Service Engines. The configure\_firewall\_se\_data and firewall\_se\_data\_rules variables must also be set | `string` | `"0.0.0.0/0"` | no |
-| <a name="input_gslb_domains"></a> [gslb\_domains](#input\_gslb\_domains) | A list of GSLB domains that will be configured | `list(string)` | <pre>[<br>  ""<br>]</pre> | no |
-| <a name="input_gslb_se_size"></a> [gslb\_se\_size](#input\_gslb\_se\_size) | The CPU, Memory, Disk Size of the Service Engines. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine. Syntax ["cpu\_cores", "memory\_in\_GB", "disk\_size\_in\_GB"] | `list(string)` | <pre>[<br>  "2",<br>  "8",<br>  "30"<br>]</pre> | no |
-| <a name="input_gslb_site_name"></a> [gslb\_site\_name](#input\_gslb\_site\_name) | The name of the GSLB site the deployed Controller(s) will be a member of. | `string` | `""` | no |
 | <a name="input_ipam_networks"></a> [ipam\_networks](#input\_ipam\_networks) | This variable configures the IPAM network(s). Example: [{ network = "192.168.1.0/24" , static\_pool = ["192.168.1.10","192.168.1.30"]}] | `list(object({ network = string, static_pool = list(string) }))` | <pre>[<br>  {<br>    "network": "",<br>    "static_pool": [<br>      ""<br>    ]<br>  }<br>]</pre> | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | This prefix is appended to the names of the Controller and SEs | `string` | n/a | yes |
 | <a name="input_network_project"></a> [network\_project](#input\_network\_project) | The GCP Network project that the Controller and SEs will use. If not set the project variable will be used | `string` | `""` | no |
