@@ -211,7 +211,7 @@ The terraform-google-avi-alb-deployment-gcp project team welcomes contributions 
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.6 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | ~> 4.25.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | 3.1.1 |
 

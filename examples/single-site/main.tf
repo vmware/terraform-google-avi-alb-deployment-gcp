@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.13.6"
+  required_version = ">= 1.3.0"
   backend "local" {
   }
 }
@@ -21,8 +21,6 @@ module "avi_controller_gcp" {
   configure_ipam_profile      = var.configure_ipam_profile
   ipam_networks               = var.ipam_networks
   configure_dns_profile       = var.configure_dns_profile
-  dns_service_domain          = var.dns_service_domain
   configure_dns_vs            = var.configure_dns_vs
-  dns_vs_settings             = var.dns_vs_settings
   register_controller         = var.register_controller
 }

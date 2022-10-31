@@ -104,6 +104,11 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/ansible/avi-controller-gcp-all-in-one-play.yml"
   }
   provisioner "file" {
+    content = templatefile("${path.module}/files/gslb-add-site-tasks.yml.tpl",
+    local.cloud_settings)
+    destination = "/home/admin/ansible/gslb-add-site-tasks.yml"
+  }
+  provisioner "file" {
     content = templatefile("${path.module}/files/avi-cloud-services-registration.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/ansible/avi-cloud-services-registration.yml"
@@ -123,7 +128,11 @@ resource "null_resource" "ansible_provisioner" {
       "cd ansible",
       "ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
-    ] : ["ansible-playbook avi-controller-gcp-all-in-one-play.yml --tags register_controller -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log"]
+      ] : [
+      "cd ansible",
+      "ansible-playbook avi-controller-gcp-all-in-one-play.yml --tags register_controller -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log",
+      "echo Controller Configuration Completed"
+    ]
   }
   provisioner "remote-exec" {
     inline = var.register_controller["enabled"] ? [

@@ -73,22 +73,28 @@ variable "ipam_networks" {
   default     = null
 }
 variable "configure_dns_profile" {
-  description = "Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns_service_domain variable must also be set"
-  type        = bool
-  default     = "false"
-}
-variable "dns_service_domain" {
-  description = "The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com"
-  type        = string
-  default     = ""
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI"
+  type = object({
+    enabled        = bool,
+    type           = optional(string, "AVI"),
+    usable_domains = list(string),
+    ttl            = optional(string, "30"),
+    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))
+  })
+  default = { enabled = false, type = "AVI", usable_domains = [] }
+  validation {
+    condition     = contains(["AWS", "AVI"], var.configure_dns_profile.type)
+    error_message = "Supported DNS Profile types are 'AWS' or 'AVI'"
+  }
 }
 variable "configure_dns_vs" {
-  description = "Create DNS Virtual Service. The configure_dns_profile and configure_ipam_profile variables must be set to true and their associated configuration variables must also be set"
-  type        = bool
-  default     = "false"
-}
-variable "dns_vs_settings" {
-  description = "The DNS Virtual Service settings. With the auto_allocate_ip option is set to \"true\" the VS IP address will be allocated via an IPAM profile. Example:{ auto_allocate_ip = \"true\", auto_allocate_public_ip = \"true\", vs_ip = \"\", network_name = \"network-192.168.20.0/24\", network = \"192.168.20.0/24\" }"
-  type        = object({ auto_allocate_ip = bool, auto_allocate_public_ip = bool, vs_ip = string, network = string })
-  default     = null
+  description = "Create Avi DNS Virtual Service. The subnet_name parameter must be an existing AWS Subnet. If the allocate_public_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM"
+  type = object({
+    enabled            = bool,
+    allocate_public_ip = optional(bool, false),
+    network            = string,
+    auto_allocate_ip   = optional(bool, true),
+    vs_ip              = optional(string)
+  })
+  default = { enabled = "false", network = "" }
 }

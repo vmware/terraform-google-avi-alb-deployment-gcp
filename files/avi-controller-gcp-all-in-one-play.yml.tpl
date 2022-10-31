@@ -365,7 +365,7 @@
             max_se: "4"
             max_vs_per_se: "1"
             extra_shared_config_memory: 2000
-            se_name_prefix: "{{ name_prefix }}{{ gslb_site_name }}"
+            se_name_prefix: "{{ name_prefix }}{{ configure_gslb.site_name }}"
             vcpus_per_se: "{{ configure_gslb.se_size.0 }}"
             memory_per_se: "{{ configure_gslb.se_size.1 }}"
             disk_per_se: "{{ configure_gslb.se_size.2 }}"
@@ -373,6 +373,8 @@
               duration: "60"
               enabled: true
           register: gslb_se_group
+          when: configure_gslb.create_se_group == true or configure_gslb.create_se_group == "null"
+
 
         - name: Create User for GSLB
           avi_user:
@@ -388,7 +390,7 @@
             is_superuser: false
             obj_password: "{{ password }}"
             obj_username: "{{ gslb_user }}"
-      when: configure_gslb == true or create_gslb_se_group == true
+      when: configure_gslb.enabled == true
       tags: gslb
 
     - name: Configure DNS Virtual Service
@@ -403,12 +405,12 @@
               vip_id: 0
 %{ if configure_dns_vs.auto_allocate_ip == "false" ~}
               ip_address:
-                addr: "{{ dns_vs_settings.vs_ip }}"
+                addr: "{{ configure_dns_vs.vs_ip }}"
                 type: "V4"
 %{ endif ~}            
-              auto_allocate_ip: "{{ dns_vs_settings.auto_allocate_ip }}"
+              auto_allocate_ip: "{{ configure_dns_vs.auto_allocate_ip }}"
 %{ if configure_dns_vs.auto_allocate_ip ~}
-              auto_allocate_floating_ip: "{{ dns_vs_settings.auto_allocate_public_ip }}"
+              auto_allocate_floating_ip: "{{ configure_dns_vs.allocate_public_ip }}"
 %{ endif ~}
               avi_allocated_vip: false
               avi_allocated_fip: false
@@ -416,16 +418,16 @@
               prefix_length: 32
               placement_networks: []
               ipam_network_subnet:
-                network_ref: "/api/network/?name=network-{{ dns_vs_settings.network }}"
+                network_ref: "/api/network/?name=network-{{ configure_dns_vs.network }}"
                 subnet:
                   ip_addr:
-                    addr: "{{ dns_vs_settings.network | ipaddr('network') }}"
+                    addr: "{{ configure_dns_vs.network | ipaddr('network') }}"
                     type: V4
-                  mask: "{{ dns_vs_settings.network | ipaddr('prefix') }}"
+                  mask: "{{ configure_dns_vs.network | ipaddr('prefix') }}"
             dns_info:
             - type: DNS_RECORD_A
               algorithm: DNS_RECORD_RESPONSE_CONSISTENT_HASH
-              fqdn: "dns.{{ dns_domain }}"
+              fqdn: "dns.{{ configure_dns_profile.usable_domains.0 }}"
             name: vsvip-DNS-VS-Default-Cloud
           register: vsvip_results
 
