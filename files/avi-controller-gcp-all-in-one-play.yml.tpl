@@ -399,7 +399,7 @@
           avi_vsvip:
             avi_credentials: "{{ avi_credentials }}"
             tenant: "admin"
-            cloud_ref: "{{ avi_cloud.obj.url }}"
+            cloud_ref: "/api/cloud?name={{ cloud_name }}"
             vip:
             - enabled: true
               vip_id: 0
@@ -458,7 +458,7 @@
 %{ if configure_gslb.enabled ~}
               se_group_ref: "{{ gslb_se_group.obj.url }}"
 %{ endif ~}
-              cloud_ref: "{{ /api/cloud?name={{ cloud_name }} }}"
+              cloud_ref: "/api/cloud?name={{ cloud_name }}"
               services:
               - port: 53
                 port_range_end: 53
