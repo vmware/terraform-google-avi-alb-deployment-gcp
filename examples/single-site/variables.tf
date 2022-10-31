@@ -63,14 +63,12 @@ variable "controller_public_address" {
   default     = "true"
 }
 variable "configure_ipam_profile" {
-  description = "Configure Avi IPAM Profile for Virtual Service Address Allocation. If set to true the virtualservice_network variable must also be set"
-  type        = bool
-  default     = "false"
-}
-variable "ipam_networks" {
-  description = "This variable configures the IPAM network(s). Example: [{ network = \"192.168.1.0/24\" , static_pool = [\"192.168.1.10\",\"192.168.1.30\"]}]"
-  type        = list(object({ network = string, static_pool = list(string) }))
-  default     = null
+  description = "Configure Avi IPAM Profile for Virtual Service Address Allocation. Example: { enabled = \"true\", networks = [{ network = \"192.168.1.0/24\" , static_pool = [\"192.168.1.10\",\"192.168.1.30\"]}] }"
+  type = object({
+    enabled  = bool,
+    networks = list(object({ network = string, static_pool = list(string) }))
+  })
+  default = { enabled = "false", networks = [{ network = "", static_pool = [""] }] }
 }
 variable "configure_dns_profile" {
   description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI"

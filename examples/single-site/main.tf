@@ -19,7 +19,6 @@ module "avi_controller_gcp" {
   controller_ha               = var.controller_ha
   controller_public_address   = var.controller_public_address
   configure_ipam_profile      = var.configure_ipam_profile
-  ipam_networks               = var.ipam_networks
   configure_dns_profile       = var.configure_dns_profile
   configure_dns_vs            = var.configure_dns_vs
   register_controller         = var.register_controller

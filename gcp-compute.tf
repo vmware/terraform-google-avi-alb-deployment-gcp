@@ -23,7 +23,6 @@ locals {
     controller_names          = local.controller_names
     cloud_router              = var.create_networking ? var.vip_allocation_strategy == "ILB" ? google_compute_router.avi[0].name : null : null
     configure_ipam_profile    = var.configure_ipam_profile
-    ipam_networks             = var.ipam_networks
     configure_dns_profile     = var.configure_dns_profile
     configure_dns_vs          = var.configure_dns_vs
     configure_gslb            = var.configure_gslb

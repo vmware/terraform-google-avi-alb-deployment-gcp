@@ -20,8 +20,7 @@ module "avi_controller_east" {
   controller_password         = var.controller_password
   name_prefix                 = var.name_prefix_east
   project                     = var.project
-  configure_ipam_profile      = "true"
-  ipam_networks               = [{ network = "192.168.252.0/24", static_pool = ["192.168.252.10", "192.168.252.100"] }]
+  configure_ipam_profile      = { enabled = "true", networks = [{ network = "192.168.252.0/24", static_pool = ["192.168.252.10", "192.168.252.100"] }] }
   configure_dns_profile       = { enabled = "true", usable_domains = ["avieast.local"] }
   configure_dns_vs            = { enabled = "true", auto_allocate_ip = true, auto_allocate_public_ip = true, vs_ip = "", network = "192.168.252.0/24" }
   configure_gslb              = { enabled = "true", site_name = "East1" }
@@ -44,8 +43,7 @@ module "avi_controller_west" {
   controller_password         = var.controller_password
   name_prefix                 = var.name_prefix_west
   project                     = var.project
-  configure_ipam_profile      = "true"
-  ipam_networks               = [{ network = "192.168.251.0/24", static_pool = ["192.168.251.10", "192.168.251.100"] }]
+  configure_ipam_profile      = { enabled = "true", networks = [{ network = "192.168.251.0/24", static_pool = ["192.168.251.10", "192.168.251.100"] }] }
   configure_dns_profile       = { enabled = "true", usable_domains = ["aviwest.local"] }
   configure_dns_vs            = { enabled = "true", auto_allocate_ip = true, auto_allocate_public_ip = true, vs_ip = "", network = "192.168.251.0/24" }
   configure_gslb              = { enabled = "true", site_name = "West1", domains = ["avigslb.local"], additional_sites = [{ name = "East1", ip_address_list = module.avi_controller_east.controllers[*].private_ip_address }] }
