@@ -212,8 +212,8 @@ The terraform-google-avi-alb-deployment-gcp project team welcomes contributions 
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 4.25.0 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | 3.1.1 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 4.41.0 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | 3.2.0 |
 
 ## Providers
 
@@ -255,7 +255,7 @@ No modules.
 | [google_project_iam_member.avi_se_service_account_role](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_project_iam_member.avi_server_role](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_project_iam_member.avi_storage_role](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
-| [null_resource.ansible_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.1.1/docs/resources/resource) | resource |
+| [null_resource.ansible_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.2.0/docs/resources/resource) | resource |
 | [google_compute_zones.available](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_zones) | data source |
 | [google_service_account.avi](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/service_account) | data source |
 
