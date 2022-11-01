@@ -217,8 +217,8 @@ The terraform-google-avi-alb-deployment-gcp project team welcomes contributions 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | 4.25.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.1.1 |
+| <a name="provider_google"></a> [google](#provider\_google) | 4.41.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.2.0 |
 
 ## Modules
 
