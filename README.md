@@ -46,6 +46,10 @@ terraform {
   backend "local" {
   }
 }
+provider "google" {
+  project = "PROJECT"
+  region  = "REGION"
+}
 module "avi_controller_gcp" {
   source  = "vmware/avi-alb-deployment-gcp/google"
   version = "1.0.x"
@@ -84,6 +88,10 @@ The example below shows a GSLB deployment with 2 regions utilized.
 terraform {
   backend "local" {
   }
+}
+provider "google" {
+  project = "PROJECT"
+  region  = "REGION"
 }
 module "avi_controller_east" {
   source  = "vmware/avi-alb-deployment-gcp/google"
