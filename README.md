@@ -91,11 +91,20 @@ terraform {
 }
 provider "google" {
   project = "PROJECT"
-  region  = "REGION"
+  region  = "us-east1"
+  alias   = "east"
+}
+provider "google" {
+  project = "PROJECT"
+  region  = "us-west1"
+  alias   = "west"
 }
 module "avi_controller_east" {
   source  = "vmware/avi-alb-deployment-gcp/google"
   version = "1.0.x"
+  providers = {
+    google = google.east
+  }
 
   region                      = "us-east1"
   create_networking           = "false"
@@ -119,6 +128,9 @@ module "avi_controller_east" {
 module "avi_controller_west" {
   source  = "vmware/avi-alb-deployment-gcp/google"
   version = "1.0.x"
+  providers = {
+    google = google.west
+  }
 
   region                          = "us-west1"
   create_networking               = "false"
