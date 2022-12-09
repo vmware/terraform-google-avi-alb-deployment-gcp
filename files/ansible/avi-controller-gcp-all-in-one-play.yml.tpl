@@ -444,8 +444,8 @@
               application_profile_ref: /api/applicationprofile?name=System-DNS
               network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
               analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-%{ if configure_gslb.enabled ~}
-              se_group_ref: "{{ gslb_se_group.obj.url }}"
+%{ if configure_gslb.enabled && configure_gslb.create_se_group ~}
+              se_group_ref: /api/serviceenginegroup?name=g-dns
 %{ endif ~}
               cloud_ref: "/api/cloud?name={{ cloud_name }}"
               services:
