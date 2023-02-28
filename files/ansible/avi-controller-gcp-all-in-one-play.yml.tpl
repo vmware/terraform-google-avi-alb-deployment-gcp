@@ -20,6 +20,15 @@
     license_tier: ${license_tier}
     controller_ip:
       ${ indent(6, yamlencode(controller_ip))}
+%{ if cluster_ip != null ~}
+    cluster_ip:
+      type: V4
+      addr: ${cluster_ip}
+%{ else ~}
+    cluster_ip:
+      type: V4
+      addr: ""
+%{ endif ~}    
     controller_names:
       ${ indent(6, yamlencode(controller_names))}
     dns_search_domain: ${dns_search_domain}
@@ -533,9 +542,6 @@
       avi_cluster:
         avi_credentials: "{{ avi_credentials }}"
         state: present
-        #virtual_ip:
-        #  type: V4
-        #  addr: "{{ controller_cluster_vip }}"
         nodes:
             - name:  "{{ controller_names[0] }}" 
               password: "{{ password }}"
@@ -557,6 +563,7 @@
 %{ else ~}
         name: "{{ name_prefix }}-cluster"
 %{ endif ~}
+        virtual_ip: "{{ cluster_ip if cluster_ip.addr != '' else omit }}"
         tenant_uuid: "admin"
       until: cluster_config is not failed
       retries: 10
