@@ -29,6 +29,7 @@ locals {
     se_ha_mode                = var.se_ha_mode
     se_service_account        = var.se_service_account
     avi_upgrade               = var.avi_upgrade
+    license_tier              = var.license_tier
   }
   controller_sizes = {
     small  = "custom-8-24576"
