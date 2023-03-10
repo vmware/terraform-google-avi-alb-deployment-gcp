@@ -31,6 +31,7 @@ locals {
     avi_upgrade               = var.avi_upgrade
     cluster_ip                = var.cluster_ip
     license_tier              = var.license_tier
+    license_key               = var.license_key
   }
   controller_sizes = {
     small  = "custom-8-24576"

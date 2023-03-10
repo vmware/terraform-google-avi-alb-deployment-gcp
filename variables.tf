@@ -11,6 +11,11 @@ variable "license_tier" {
     error_message = "The license_tier variable must be ENTERPRISE_WITH_CLOUD_SERVICES or ENTERPRISE."
   }
 }
+variable "license_key" {
+  description = "The license key that will be applied when the tier is set to ENTERPRISE with the license_tier variable"
+  type        = string
+  default     = ""
+}
 variable "cluster_ip" {
   description = "Sets the IP address of the Avi Controller cluster. This address must be in the same subnet as the Avi Controller VMs."
   type        = string
