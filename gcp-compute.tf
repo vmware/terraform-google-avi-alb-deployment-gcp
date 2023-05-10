@@ -130,10 +130,12 @@ resource "null_resource" "ansible_provisioner" {
   }
   provisioner "remote-exec" {
     inline = var.configure_controller ? [
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-gcp-all-in-one-play.yml -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-gcp-all-in-one-play.yml --tags register_controller -e password='${var.controller_password}' 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
@@ -141,6 +143,7 @@ resource "null_resource" "ansible_provisioner" {
   }
   provisioner "remote-exec" {
     inline = var.register_controller["enabled"] ? [
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Controller Registration Completed"
@@ -148,6 +151,7 @@ resource "null_resource" "ansible_provisioner" {
   }
   provisioner "remote-exec" {
     inline = var.avi_upgrade["enabled"] ? [
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-upgrade.yml -e password=${var.controller_password} -e upgrade_type=${var.avi_upgrade["upgrade_type"]} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Avi upgrade completed"
