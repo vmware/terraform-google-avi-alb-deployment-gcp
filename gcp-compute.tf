@@ -37,9 +37,9 @@ locals {
     ca_certificates           = var.ca_certificates
   }
   controller_sizes = {
-    small  = "custom-8-24576"
-    medium = "custom-16-32768"
-    large  = "custom-24-49152"
+    small  = "custom-6-32768"
+    medium = "custom-10-32768"
+    large  = "custom-16-49152"
   }
 
   controller_names = google_compute_instance.avi_controller[*].name
